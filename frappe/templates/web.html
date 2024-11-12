@@ -5,32 +5,37 @@
 
 {% macro main_content() %}
 <div class="page-content-wrapper">
-	<!-- breadcrumbs -->
-	<div class="page-breadcrumbs">
+	<!-- Breadcrumbs -->
+	<div class="page-breadcrumbs" aria-label="breadcrumbs">
 		{% block breadcrumbs %}
 			{% include 'templates/includes/breadcrumbs.html' %}
 		{% endblock %}
 	</div>
 
+	<!-- Main Page Container -->
 	{% block page_container %}
-	<main class="{% if not full_width %}container my-4{% endif %}">
+	<main class="{% if not full_width %}container my-4{% else %}w-100{% endif %}" role="main">
+		<!-- Page Header Section -->
 		<div class="page-header-wrapper">
-			<div class="page-header">
+			<div class="page-header" role="banner" aria-label="Page Header">
 				{% block header %}{% endblock %}
 			</div>
 
+			<!-- Optional Header Actions -->
 			{% if self.header_actions() %}
-			<div class="page-header-actions-block">
+			<div class="page-header-actions-block" role="region" aria-label="Header Actions">
 				{% block header_actions %}{% endblock %}
 			</div>
 			{% endif %}
 		</div>
 
-		<div class="page_content">
+		<!-- Main Content Area -->
+		<div class="page_content" role="region" aria-label="Main Content">
 			{%- block page_content -%}{%- endblock -%}
 		</div>
 
-		<div class="page-footer">
+		<!-- Page Footer -->
+		<div class="page-footer" role="contentinfo">
 			{%- block page_footer -%}{%- endblock -%}
 		</div>
 	</main>
@@ -39,15 +44,21 @@
 {% endmacro %}
 
 {% macro container_attributes() -%}
-id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
-{%- if page_or_generator=="Generator" %}source-type="Generator" data-doctype="{{ doctype }}"{%- endif %}
-{%- if source_content_type %}source-content-type="{{ source_content_type }}"{%- endif %}
+id="page-{{ name or 'default' }}" 
+data-path="{{ pathname | e }}" 
+{%- if page_or_generator == "Generator" %} 
+	source-type="Generator" 
+	data-doctype="{{ doctype }}" 
+{%- endif %} 
+{%- if source_content_type %} 
+	source-content-type="{{ source_content_type }}" 
+{%- endif %}
 {%- endmacro %}
 
 {% macro sidebar() %}
-<div class="sidebar-column col-sm-{{ columns }}">
+<div class="sidebar-column col-sm-{{ columns }}" role="complementary" aria-label="Sidebar">
 	{% block page_sidebar %}
-	{% include "templates/includes/web_sidebar.html" %}
+		{% include "templates/includes/web_sidebar.html" %}
 	{% endblock %}
 </div>
 {% endmacro %}
@@ -56,21 +67,38 @@ id="page-{{ name or route | e }}" data-path="{{ pathname | e }}"
 <div class="container">
 	<div class="row" {{ container_attributes() }}>
 		{%- set columns = sidebar_columns or 2 -%}
-		{%- if not sidebar_right -%}
-		{{ sidebar() }}
-		{%- endif -%}
+		
+		<!-- Left Sidebar -->
+		{% if not sidebar_right %}
+			{{ sidebar() }}
+		{% endif %}
+		
+		<!-- Main Content Column -->
 		<div class="main-column col-sm-{{ 12 - columns }}">
 			{{ main_content() }}
 		</div>
-		{%- if sidebar_right -%}
-		{{ sidebar() }}
-		{%- endif -%}
+		
+		<!-- Right Sidebar -->
+		{% if sidebar_right %}
+			{{ sidebar() }}
+		{% endif %}
 	</div>
 </div>
 {% else %}
+<!-- Full-width Main Content if No Sidebar -->
 <div {{ container_attributes() }}>
 	{{ main_content() }}
 </div>
 {% endif %}
+
+<!-- Loading Placeholder -->
+<div class="loading-spinner" role="status" aria-live="polite" hidden>
+	Loading...
+</div>
+
+<!-- Error Message Placeholder -->
+<div class="error-message" role="alert" hidden>
+	Something went wrong. Please try again.
+</div>
 
 {% endblock %}
